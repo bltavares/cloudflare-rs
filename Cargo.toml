@@ -1,0 +1,8 @@
+[package]
+name = "cloudflare"
+version = "0.1.0"
+authors = ["Bruno Tavares <bruno.exz@gmail.com>"]
+
+[dependencies]
+hyper = "0.5.1"
+rustc-serialize = "0.3.14"

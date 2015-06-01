@@ -1,6 +1,8 @@
 extern crate hyper;
 extern crate rustc_serialize;
 
+mod errors;
+
 use hyper::Url;
 use hyper::client::Client;
 use hyper::client::response::Response;
@@ -9,14 +11,9 @@ use std::collections::HashMap;
 use std::io::Read;
 use rustc_serialize::json;
 use rustc_serialize::{Decoder, Decodable};
+use errors::CloudFlareErrors;
 
 const DO_URL : &'static str = "https://www.cloudflare.com/api_json.html";
-
-#[derive(Debug)]
-pub enum CloudFlareErrors {
-    APIError(hyper::error::Error),
-    ParsingError(rustc_serialize::json::DecoderError)
-}
 
 #[derive(Debug,Eq,PartialEq)]
 pub enum Actions {
@@ -87,14 +84,6 @@ impl<'a> From<&'a Authentication> for HashMap<&'a str, &'a str> {
 
         hash
     }
-}
-
-impl From<hyper::error::Error> for CloudFlareErrors {
-    fn from(error: hyper::error::Error) -> CloudFlareErrors { CloudFlareErrors::APIError(error) }
-}
-
-impl From<rustc_serialize::json::DecoderError> for CloudFlareErrors {
-    fn from(error: rustc_serialize::json::DecoderError) -> CloudFlareErrors { CloudFlareErrors::ParsingError(error) }
 }
 
 fn payload_for_action<'a>(auth : &'a Authentication, action: Actions) -> HashMap<&'a str, &'a str> {

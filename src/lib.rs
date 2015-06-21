@@ -29,14 +29,14 @@ pub struct Authentication {
 
 #[derive(Debug,PartialEq,Eq)]
 pub struct Record {
-    rec_id: String,
-    zone_name: String,
-    display_name: String,
-    name: String,
-    content: String,
-    record_type: String,
-    prio: Option<String>,
-    ttl: String,
+    pub rec_id: String,
+    pub zone_name: String,
+    pub display_name: String,
+    pub name: String,
+    pub content: String,
+    pub record_type: String,
+    pub prio: Option<String>,
+    pub ttl: String,
 }
 
 #[derive(Debug,PartialEq,Eq,RustcDecodable)]

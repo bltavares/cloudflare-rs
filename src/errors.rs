@@ -7,7 +7,7 @@ use std::error::Error;
 #[derive(Debug)]
 pub enum CloudFlareErrors {
     APIError(hyper::error::Error),
-    ParsingError(rustc_serialize::json::DecoderError)
+    ParsingError(rustc_serialize::json::DecoderError),
 }
 
 impl fmt::Display for CloudFlareErrors {
@@ -29,9 +29,13 @@ impl Error for CloudFlareErrors {
 }
 
 impl From<hyper::error::Error> for CloudFlareErrors {
-    fn from(error: hyper::error::Error) -> CloudFlareErrors { CloudFlareErrors::APIError(error) }
+    fn from(error: hyper::error::Error) -> CloudFlareErrors {
+        CloudFlareErrors::APIError(error)
+    }
 }
 
 impl From<rustc_serialize::json::DecoderError> for CloudFlareErrors {
-    fn from(error: rustc_serialize::json::DecoderError) -> CloudFlareErrors { CloudFlareErrors::ParsingError(error) }
+    fn from(error: rustc_serialize::json::DecoderError) -> CloudFlareErrors {
+        CloudFlareErrors::ParsingError(error)
+    }
 }

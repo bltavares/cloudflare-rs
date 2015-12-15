@@ -13,18 +13,18 @@ use rustc_serialize::json;
 use rustc_serialize::{Decoder, Decodable};
 use errors::CloudFlareErrors;
 
-const DO_URL : &'static str = "https://www.cloudflare.com/api_json.html";
+const DO_URL: &'static str = "https://www.cloudflare.com/api_json.html";
 
 #[derive(Debug,Eq,PartialEq)]
 pub enum Actions {
-    AllRecords
+    AllRecords,
 }
 
 #[derive(Debug,Eq,PartialEq,Clone)]
 pub struct Authentication {
     pub email: String,
     pub token: String,
-    pub domain: Option<String>
+    pub domain: Option<String>,
 }
 
 #[derive(Debug,PartialEq,Eq)]
@@ -41,17 +41,17 @@ pub struct Record {
 
 #[derive(Debug,PartialEq,Eq,RustcDecodable)]
 struct CloudFlareResponse {
-    response: CloudFlareResponseRecs
+    response: CloudFlareResponseRecs,
 }
 
 #[derive(Debug,PartialEq,Eq,RustcDecodable)]
 struct CloudFlareResponseRecs {
-    recs: CloudFlareResponseRecords
+    recs: CloudFlareResponseRecords,
 }
 
 #[derive(Debug,PartialEq,Eq,RustcDecodable)]
 struct CloudFlareResponseRecords {
-    objs: Vec<Record>
+    objs: Vec<Record>,
 }
 
 impl Decodable for Record {
@@ -72,8 +72,8 @@ impl Decodable for Record {
 }
 
 impl<'a> From<&'a Authentication> for HashMap<&'a str, &'a str> {
-    fn from(auth : &'a Authentication) -> HashMap<&'a str, &'a str> {
-        let mut hash : HashMap<&'a str, &'a str> = HashMap::new();
+    fn from(auth: &'a Authentication) -> HashMap<&'a str, &'a str> {
+        let mut hash: HashMap<&'a str, &'a str> = HashMap::new();
         hash.insert("email", &auth.email);
         hash.insert("tkn", &auth.token);
 
@@ -86,22 +86,24 @@ impl<'a> From<&'a Authentication> for HashMap<&'a str, &'a str> {
     }
 }
 
-fn payload_for_action<'a>(auth : &'a Authentication, action: Actions) -> HashMap<&'a str, &'a str> {
-    let mut auth_info = HashMap::<&str,&str>::from(auth);
+fn payload_for_action<'a>(auth: &'a Authentication, action: Actions) -> HashMap<&'a str, &'a str> {
+    let mut auth_info = HashMap::<&str, &str>::from(auth);
     let action = match action {
-        Actions::AllRecords => "rec_load_all"
+        Actions::AllRecords => "rec_load_all",
     };
 
     auth_info.insert("a", action);
     auth_info
 }
 
-pub fn list_records(client: &mut Client, auth : &Authentication) -> Result<Vec<Record>, CloudFlareErrors> {
+pub fn list_records(client: &mut Client,
+                    auth: &Authentication)
+                    -> Result<Vec<Record>, CloudFlareErrors> {
     let payload = payload_for_action(auth, Actions::AllRecords);
     let mut url = Url::parse(DO_URL).unwrap();
     url.set_query_from_pairs(payload.into_iter());
 
-    let read_body = |mut response : Response| -> Result<String, Error> {
+    let read_body = |mut response: Response| -> Result<String, Error> {
         let mut body = String::new();
         response.read_to_string(&mut body).map(|_| body).map_err(Error::from)
     };
@@ -118,27 +120,33 @@ pub fn list_records(client: &mut Client, auth : &Authentication) -> Result<Vec<R
 
 #[test]
 fn it_converts_authentication_into_request_params() {
-    let auth  = Authentication {
+    let auth = Authentication {
         email: "email@example.com".to_owned(),
         token: "token".to_owned(),
-        domain: None
+        domain: None,
     };
 
-    let auth_info = HashMap::<_,_>::from(&auth);
-    let expected_info : HashMap<_,_> = vec![("tkn", "token"), ("email", "email@example.com")].into_iter().collect();
+    let auth_info = HashMap::<_, _>::from(&auth);
+    let expected_info: HashMap<_, _> = vec![("tkn", "token"), ("email", "email@example.com")]
+                                           .into_iter()
+                                           .collect();
     assert_eq!(auth_info, expected_info);
 }
 
 #[test]
 fn it_converts_authentication_into_request_params_including_a_domain() {
-    let auth  = Authentication {
+    let auth = Authentication {
         email: "email@example.com".to_owned(),
         token: "token".to_owned(),
-        domain: Some("example.com".to_owned())
+        domain: Some("example.com".to_owned()),
     };
 
-    let auth_info = HashMap::<_,_>::from(&auth);
-    let expected_info : HashMap<_,_> = vec![("tkn", "token"), ("email", "email@example.com"), ("z", "example.com")].into_iter().collect();
+    let auth_info = HashMap::<_, _>::from(&auth);
+    let expected_info: HashMap<_, _> = vec![("tkn", "token"),
+                                            ("email", "email@example.com"),
+                                            ("z", "example.com")]
+                                           .into_iter()
+                                           .collect();
     assert_eq!(auth_info, expected_info);
 }
 
